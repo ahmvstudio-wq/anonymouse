@@ -1,0 +1,122 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  CLIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  TERMINATED
+}
+
+enum FileAction {
+  UPLOAD
+  DOWNLOAD
+}
+
+model User {
+  id           String              @id @default(uuid()) @db.Uuid
+  systemId     String              @unique
+  role         Role
+  status       UserStatus
+  passwordHash String
+  createdAt    DateTime            @default(now())
+  
+  identity    IdentityMapping?
+  tokens      RefreshToken[]
+  projects    Project[]           @relation("ClientProjects")
+  assignments ProjectAssignment[]
+}
+
+model IdentityMapping {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @db.Uuid
+  encryptedData Bytes
+  iv            Bytes
+  authTag       Bytes
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  token     String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          String              @id @default(uuid()) @db.Uuid
+  name        String
+  clientId    String              @db.Uuid
+  createdAt   DateTime            @default(now())
+  
+  client      User                @relation("ClientProjects", fields: [clientId], references: [id])
+  assignments ProjectAssignment[]
+  channel     Channel?
+  files       FileRecord[]
+}
+
+model ProjectAssignment {
+  projectId  String   @db.Uuid
+  userId     String   @db.Uuid
+  assignedAt DateTime @default(now())
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+}
+
+model Channel {
+  id        String    @id @default(uuid()) @db.Uuid
+  projectId String    @unique @db.Uuid
+  
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages  Message[]
+}
+
+model Message {
+  id             String   @id @default(uuid()) @db.Uuid
+  channelId      String   @db.Uuid
+  senderSystemId String
+  content        String
+  createdAt      DateTime @default(now())
+  
+  channel        Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+}
+
+model FileRecord {
+  id               String          @id @default(uuid()) @db.Uuid
+  projectId        String          @db.Uuid
+  uploaderSystemId String
+  s3Key            String
+  originalName     String
+  mimeType         String
+  createdAt        DateTime        @default(now())
+  
+  project          Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  accessLogs       FileAccessLog[]
+}
+
+model FileAccessLog {
+  id             String     @id @default(uuid()) @db.Uuid
+  fileId         String     @db.Uuid
+  actorSystemId  String
+  action         FileAction
+  createdAt      DateTime   @default(now())
+  
+  file           FileRecord @relation(fields: [fileId], references: [id], onDelete: Cascade)
+}

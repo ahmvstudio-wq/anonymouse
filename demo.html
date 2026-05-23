@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anonymouse — Secure Team Messaging</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #09090b;
+  --bg-secondary: #18181b;
+  --bg-tertiary: #27272a;
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;
+  --border-light: #27272a;
+  --accent: #fafafa;
+  --accent-hover: #e4e4e7;
+  --primary-color: #fafafa;
+  --primary-hover: #e4e4e7;
+  --danger: #ef4444;
+  --success: #10b981;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-float: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-main); height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeInSlideUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.screen { display: none !important; height: 100vh; width: 100vw; }
+.screen.active { display: flex !important; animation: fadeIn 0.3s ease-out forwards; }
+
+/* ── TYPOGRAPHY & BUTTONS ── */
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.02em; }
+p { line-height: 1.6; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: var(--transition); border: 1px solid transparent; outline: none;
+}
+.btn-primary { background: var(--accent); color: var(--bg-primary); }
+.btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.btn-secondary { background: var(--bg-primary); border-color: var(--border-light); color: var(--text-main); }
+.btn-secondary:hover { background: var(--bg-secondary); }
+.btn-ghost { background: transparent; color: var(--text-muted); padding: 8px 12px; }
+.btn-ghost:hover { background: var(--bg-secondary); color: var(--text-main); }
+
+/* ── ROLE PICKER (Screen 1) ── */
+#s-pick { flex-direction: column; align-items: center; justify-content: center; background: var(--bg-primary); }
+.pick-container { max-width: 800px; padding: 40px; text-align: center; animation: fadeInSlideUp 0.5s ease-out; }
+.brand-logo { width: 48px; height: 48px; background: var(--text-main); color: var(--bg-primary); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 24px; box-shadow: var(--shadow-md); }
+.pick-title { font-size: 32px; margin-bottom: 12px; }
+.pick-sub { font-size: 16px; color: var(--text-muted); margin-bottom: 48px; max-width: 400px; margin-left: auto; margin-right: auto; }
+
+.role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.role-card {
+  background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: var(--radius-md);
+  padding: 32px 24px; text-align: left; cursor: pointer; transition: var(--transition);
+  display: flex; flex-direction: column; position: relative; overflow: hidden;
+}
+.role-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: transparent; transition: var(--transition); }
+.role-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-float); border-color: transparent; }
+.role-card:hover::before { background: var(--accent); }
+.rc-icon { font-size: 28px; margin-bottom: 16px; display: inline-block; padding: 10px; background: var(--bg-secondary); border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
+.rc-name { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.rc-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+/* ── ONBOARDING (Screen 2) ── */
+#s-onboard { flex-direction: column; align-items: center; justify-content: center; background: var(--bg-primary); }
+.ob-container { max-width: 500px; width: 100%; animation: fadeInSlideUp 0.4s ease-out; position: relative; }
+.ob-step { display: none; flex-direction: column; }
+.ob-step.active { display: flex; animation: fadeIn 0.3s ease-out; }
+.ob-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.ob-header-icon { font-size: 32px; }
+.ob-title { font-size: 24px; }
+.ob-body { font-size: 15px; color: var(--text-muted); margin-bottom: 32px; }
+.ob-feature { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px; padding: 16px; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: var(--radius-md); }
+.ob-feature-icon { font-size: 18px; margin-top: 2px; }
+.ob-feature-text h4 { font-size: 14px; margin-bottom: 4px; color: var(--text-main); }
+.ob-feature-text p { font-size: 13px; color: var(--text-muted); }
+
+.ob-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border-light); }
+.ob-dots { display: flex; gap: 6px; }
+.ob-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-light); transition: var(--transition); }
+.ob-dot.active { background: var(--accent); width: 18px; border-radius: 4px; }
+.ob-actions { display: flex; gap: 12px; }
+
+/* ── ADMIN DASHBOARD (Screen 3) ── */
+#s-admin { display: flex; background: var(--bg-primary); }
+
+/* App Sidebar (Shared structure for Admin & Chat) */
+.app-sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; flex-shrink: 0; }
+.app-sidebar-header { padding: 20px 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 12px; }
+.app-logo { width: 28px; height: 28px; background: var(--accent); color: var(--bg-primary); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+.app-title { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+.app-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
+.nav-item:hover { background: var(--border-light); color: var(--text-main); }
+.nav-item.active { background: var(--bg-tertiary); color: var(--text-main); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+.nav-icon { font-size: 16px; opacity: 0.8; }
+.app-sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.user-avatar-sm { width: 24px; height: 24px; border-radius: 50%; background: var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: var(--text-main); }
+
+/* Admin Main Content */
+.admin-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); }
+.admin-header { height: 69px; padding: 0 32px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.admin-header h2 { font-size: 16px; font-weight: 500; }
+.admin-scroll { flex: 1; overflow-y: auto; padding: 32px; }
+
+/* Dashboard Widgets */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 32px; }
+.stat-box { border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; background: var(--bg-primary); box-shadow: var(--shadow-sm); }
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-val { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+
+/* Tables & Lists (Notion style) */
+.list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.list-header h3 { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.n-table { width: 100%; border-collapse: separate; border-spacing: 0; margin-bottom: 24px; }
+.n-table th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 500; color: var(--text-muted); border-bottom: 1px solid var(--border-light); }
+.n-table td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--bg-tertiary); transition: background 0.15s; }
+.n-table tr:hover td { background: var(--bg-secondary); }
+.n-table tr:last-child td { border-bottom: none; }
+
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; border: 1px solid transparent; }
+.badge-gray { background: var(--bg-tertiary); color: var(--text-main); border-color: var(--border-light); }
+.badge-blue { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.2); }
+.badge-green { background: rgba(16, 185, 129, 0.1); color: #34d399; border-color: rgba(16, 185, 129, 0.2); }
+.badge-red { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: rgba(239, 68, 68, 0.2); }
+
+/* Live Monitor Feed */
+.monitor-feed { border: 1px solid var(--border-light); border-radius: var(--radius-md); background: var(--bg-tertiary); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 12px; height: 300px; overflow-y: auto; padding: 12px; }
+.feed-line { padding: 6px 8px; border-bottom: 1px solid var(--border-light); display: flex; gap: 12px; }
+.feed-time { color: var(--text-muted); width: 65px; flex-shrink: 0; }
+.feed-tag { font-weight: 600; width: 50px; flex-shrink: 0; }
+.tag-auth { color: #a78bfa; } .tag-proj { color: #60a5fa; } .tag-pii { color: #f87171; } .tag-msg { color: #34d399; } .tag-file { color: #fbbf24; }
+.feed-text { color: var(--text-main); }
+
+/* ── CHAT APP (Screen 4) ── */
+#s-chat { display: flex; background: var(--bg-primary); }
+
+.chat-nav { padding: 12px; flex: 1; overflow-y: auto; }
+.chat-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 0 12px; margin-bottom: 8px; margin-top: 16px; }
+.chat-channel { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); margin-bottom: 2px; }
+.chat-channel:hover { background: var(--border-light); }
+.chat-channel.active { background: var(--bg-primary); box-shadow: var(--shadow-sm); border: 1px solid var(--border-light); }
+.cc-icon { color: var(--text-muted); font-size: 16px; }
+.chat-channel.active .cc-icon { color: var(--accent); }
+.cc-name { font-size: 13px; font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.chat-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-primary); position: relative; }
+.chat-header-bar { height: 69px; padding: 0 24px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(8px); z-index: 10; }
+.ch-info h2 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.ch-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.ch-members { display: flex; align-items: center; }
+.member-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--bg-secondary); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; margin-left: -8px; box-shadow: 0 0 0 2px var(--bg-primary); }
+
+.chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.msg-wrap { display: flex; flex-direction: column; max-width: 70%; animation: fadeInSlideUp 0.2s ease-out; }
+.msg-wrap.me { align-self: flex-end; align-items: flex-end; }
+.msg-wrap.them { align-self: flex-start; align-items: flex-start; }
+.msg-sender { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; padding: 0 4px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.msg-bubble { padding: 12px 16px; font-size: 14px; line-height: 1.5; word-break: break-word; position: relative; }
+.msg-wrap.me .msg-bubble { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 16px 16px 4px 16px; color: var(--text-main); }
+.msg-wrap.them .msg-bubble { background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 16px 16px 16px 4px; color: var(--text-main); box-shadow: var(--shadow-sm); }
+.msg-time { font-size: 10px; color: var(--text-muted); margin-top: 4px; padding: 0 4px; }
+.redact-alert { display: inline-flex; align-items: center; gap: 4px; background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; margin-top: 8px; }
+
+/* File Bubble */
+.file-card { display: flex; align-items: center; gap: 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px 16px; max-width: 280px; box-shadow: var(--shadow-sm); cursor: pointer; transition: var(--transition); }
+.file-card:hover { box-shadow: var(--shadow-md); border-color: var(--text-muted); }
+.fc-icon { font-size: 24px; padding: 8px; background: var(--bg-secondary); border-radius: 8px; }
+.fc-details { flex: 1; min-width: 0; }
+.fc-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.fc-meta { font-size: 11px; color: #10b981; display: flex; align-items: center; gap: 4px; }
+
+.chat-input-area { padding: 16px 24px 24px; background: var(--bg-primary); }
+.input-box { display: flex; align-items: flex-end; gap: 12px; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 16px; padding: 8px; box-shadow: var(--shadow-sm); transition: var(--transition); }
+.input-box:focus-within { border-color: var(--text-muted); box-shadow: var(--shadow-md); }
+.btn-attach { background: transparent; border: none; color: var(--text-muted); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: var(--transition); }
+.btn-attach:hover { background: var(--bg-secondary); color: var(--text-main); }
+.chat-textarea { flex: 1; border: none; background: transparent; padding: 8px 4px; font-family: inherit; font-size: 14px; color: var(--text-main); resize: none; outline: none; max-height: 120px; line-height: 1.5; }
+.chat-textarea::placeholder { color: var(--text-muted); }
+.btn-send { background: var(--accent); color: var(--bg-primary); border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
+.btn-send:hover { transform: scale(1.05); }
+
+/* ── MODALS & TOASTS ── */
+.modal-bg { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 50; }
+.modal-bg.active { display: flex; animation: fadeIn 0.2s ease-out; }
+.modal-content { background: var(--bg-primary); width: 100%; max-width: 440px; border-radius: var(--radius-lg); border: 1px solid var(--border-light); box-shadow: var(--shadow-float); padding: 32px; transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.modal-bg.active .modal-content { transform: scale(1); }
+.modal-header { margin-bottom: 24px; }
+.modal-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.modal-desc { font-size: 13px; color: var(--text-muted); }
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+.form-input, .form-select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-family: inherit; font-size: 14px; outline: none; transition: var(--transition); background: var(--bg-primary); color: var(--text-main); }
+.form-input:focus, .form-select:focus { border-color: var(--text-main); box-shadow: 0 0 0 1px var(--text-main); }
+.checkbox-list { border: 1px solid var(--border-light); border-radius: var(--radius-sm); max-height: 140px; overflow-y: auto; padding: 4px; }
+.cb-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: var(--transition); }
+.cb-item:hover { background: var(--bg-secondary); }
+.cb-item input { accent-color: var(--accent); }
+.modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--text-main); color: white; padding: 12px 20px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; box-shadow: var(--shadow-float); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100; pointer-events: none; display: flex; align-items: center; gap: 8px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Demo Console Sidebar */
+.demo-console {
+  width: 260px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+.console-section {
+  margin-bottom: 24px;
+}
+.console-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+.preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.preset-item {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  color: var(--text-main);
+}
+.preset-item:hover {
+  background: var(--bg-secondary);
+  border-color: var(--text-muted);
+}
+.preset-item strong {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+#fileInputHidden { display: none; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: ROLE PICKER -->
+<div class="screen active" id="s-pick">
+  <div class="pick-container">
+    <div class="brand-logo">🔒</div>
+    <h1 class="pick-title">Anonymouse</h1>
+    <p class="pick-sub">The secure, identity-protected messaging platform for professional teams and clients.</p>
+    
+    <div class="role-grid">
+      <div class="role-card" onclick="pickRole('admin')">
+        <div class="rc-icon">🛡️</div>
+        <div class="rc-name">Admin</div>
+        <div class="rc-desc">Manage the platform, create projects, and oversee security.</div>
+      </div>
+      <div class="role-card" onclick="pickRole('agent')">
+        <div class="rc-icon">💼</div>
+        <div class="rc-name">Team Member</div>
+        <div class="rc-desc">Work securely. Your real name and details are hidden.</div>
+      </div>
+      <div class="role-card" onclick="pickRole('client')">
+        <div class="rc-icon">🤝</div>
+        <div class="rc-name">Client</div>
+        <div class="rc-desc">Communicate with the team safely and privately.</div>
+      </div>
+    </div>
+    
+    <div style="margin-top: 40px; text-align: center;">
+      <button onclick="resetState()" class="btn btn-ghost" style="font-size: 12px; color: var(--text-muted); gap: 6px;">
+        🔄 Reset Simulator Data
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: ONBOARDING -->
+<div class="screen" id="s-onboard">
+  <div class="ob-container">
+    <div id="obStepsContainer"></div>
+    <div class="ob-footer">
+      <div class="ob-dots" id="obDotsContainer"></div>
+      <div class="ob-actions">
+        <button class="btn btn-ghost" onclick="prevStep()">Back</button>
+        <button class="btn btn-primary" id="obNextBtn" onclick="nextStep()">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: ADMIN DASHBOARD -->
+<div class="screen" id="s-admin">
+  <div class="app-sidebar">
+    <div class="app-sidebar-header">
+      <div class="app-logo">🔒</div>
+      <div class="app-title">Anonymouse</div>
+    </div>
+    <div class="app-nav">
+      <div class="nav-item active" onclick="adminNav('overview')" id="nav-overview"><span class="nav-icon">◱</span> Overview</div>
+      <div class="nav-item" onclick="adminNav('users')" id="nav-users"><span class="nav-icon">👥</span> Users</div>
+      <div class="nav-item" onclick="adminNav('projects')" id="nav-projects"><span class="nav-icon">📁</span> Projects</div>
+      <div class="nav-item" onclick="adminNav('monitor')" id="nav-monitor"><span class="nav-icon">⚡</span> Live Monitor</div>
+    </div>
+    <div class="app-sidebar-footer" style="justify-content: space-between; width: 100%;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="user-avatar-sm" id="admSmAvatar">AD</div>
+        <span id="admSmName">Admin User</span>
+      </div>
+      <button onclick="showScreen('s-pick')" class="btn-icon" title="Switch Persona" style="background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; display: flex; align-items: center; padding: 4px; border-radius: 4px; transition: var(--transition);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </button>
+    </div>
+  </div>
+  
+  <div class="admin-main">
+    <div class="admin-header">
+      <h2 id="admPageTitle">Overview</h2>
+    </div>
+    <div class="admin-scroll" id="adminContentArea">
+      <!-- Dynamic Admin Content -->
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 4: CHAT INTERFACE -->
+<div class="screen" id="s-chat">
+  <div class="app-sidebar">
+    <div class="app-sidebar-header">
+      <div class="app-logo">🔒</div>
+      <div class="app-title">Anonymouse</div>
+    </div>
+    <div class="chat-nav">
+      <div class="chat-section-title">Projects</div>
+      <div id="chatChannelsList">
+        <!-- Dynamic Channels -->
+      </div>
+    </div>
+    <div class="app-sidebar-footer" style="flex-direction: column; align-items: flex-start; gap: 8px; width: 100%;">
+      <div style="display:flex; align-items:center; justify-content: space-between; width: 100%;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="user-avatar-sm" id="chatMyAvatar"></div>
+          <span style="font-weight:500; color:var(--text-main)" id="chatMyId"></span>
+        </div>
+        <button onclick="showScreen('s-pick')" class="btn-icon" title="Switch Persona" style="background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; display: flex; align-items: center; padding: 4px; border-radius: 4px; transition: var(--transition);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+      <div style="font-size:10px; color:var(--success); display:flex; align-items:center; gap:4px; margin-left: 32px;">
+        <span style="width:6px; height:6px; background:var(--success); border-radius:50%;"></span> Identity Protected
+      </div>
+    </div>
+  </div>
+  
+  <div class="chat-main" id="chatMainArea">
+    <div class="empty-chat" id="emptyChatState">
+      <div class="big">💬</div>
+      <div>Select a project channel to begin</div>
+    </div>
+    
+    <div id="activeChatView" style="display:none; flex:1; flex-direction:column; height:100%;">
+      <div class="chat-header-bar">
+        <div class="ch-info">
+          <h2 id="chTitle"># Project Name</h2>
+          <p id="chSub">Secure channel</p>
+        </div>
+        <div class="ch-members" id="chMembers">
+          <!-- Avatars -->
+        </div>
+      </div>
+      
+      <div class="chat-messages" id="chatMessagesBox">
+        <!-- Messages -->
+      </div>
+      
+      <div class="chat-input-area" id="chatInputSection">
+        <div class="input-box">
+          <button class="btn-attach" onclick="document.getElementById('fileInputHidden').click()">+</button>
+          <textarea class="chat-textarea" id="chatTextInput" placeholder="Message securely..." rows="1" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendChatMessage(); }"></textarea>
+          <button class="btn-send" onclick="sendChatMessage()">↑</button>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          End-to-end PII filtering is active
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Demo Controls Sidebar -->
+  <div class="demo-console">
+    <div class="console-section">
+      <div class="console-title">Active Persona</div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label">Speak as:</label>
+        <select id="activePersonaSelect" class="form-select" onchange="switchDemoPersona(this.value)">
+          <!-- Options populated dynamically -->
+        </select>
+      </div>
+    </div>
+    
+    <div class="console-section">
+      <div class="console-title">Redaction Presets</div>
+      <div class="preset-list">
+        <button class="preset-item" onclick="loadPreset('Reach me at 9876543210')">
+          <strong>Indian Phone</strong>
+          9876543210
+        </button>
+        <button class="preset-item" onclick="loadPreset('Contact me at test@company.com')">
+          <strong>Email Address</strong>
+          test@company.com
+        </button>
+        <button class="preset-item" onclick="loadPreset('Send to user@upi')">
+          <strong>UPI ID</strong>
+          user@upi
+        </button>
+        <button class="preset-item" onclick="loadPreset('Read details on http://google.com')">
+          <strong>Link</strong>
+          http://google.com
+        </button>
+      </div>
+    </div>
+    
+    <div class="console-section">
+      <div class="console-title">Sanitizer Simulation</div>
+      <div class="preset-list">
+        <button class="preset-item" onclick="simulateSanitize('exif_photo.jpg', 'image')">
+          <strong>Exif Image</strong>
+          Strip GPS & Device data
+        </button>
+        <button class="preset-item" onclick="simulateSanitize('confidential.docx', 'doc')">
+          <strong>Word Docx</strong>
+          Strip Author & XML properties
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="globalModal">
+  <div class="modal-content" id="modalInner"></div>
+</div>
+
+<div class="toast" id="toastBox">
+  <span id="toastIcon"></span> <span id="toastText"></span>
+</div>
+
+<input type="file" id="fileInputHidden">
+
+<script src="demo.js"></script>
+</body>
+</html>

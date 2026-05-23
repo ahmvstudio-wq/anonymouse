@@ -1,0 +1,578 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:16px;overflow-x:auto}
+.tab-btn{padding:9px 14px;font-size:12px;cursor:pointer;color:var(--color-text-secondary);border:none;border-bottom:2px solid transparent;background:transparent;transition:all .15s;white-space:nowrap;font-family:var(--font-sans)}
+.tab-btn.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.pane{display:none}.pane.active{display:block}
+.layer-lbl{font-size:10px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.nrow{display:flex;gap:7px;margin-bottom:5px}
+.anode{flex:1;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:8px 10px;text-align:center;cursor:pointer;transition:background .15s}
+.anode:hover{background:var(--color-background-secondary)}
+.anode .nn{font-size:12px;font-weight:500}
+.anode .ns{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+.conn{text-align:center;font-size:11px;color:var(--color-text-secondary);opacity:.45;margin:5px 0}
+.ag-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:13px 15px;margin-bottom:9px;cursor:pointer}
+.ag-card:hover{background:var(--color-background-secondary)}
+.ag-hdr{display:flex;align-items:center;justify-content:space-between}
+.ag-hdr-l{display:flex;align-items:center;gap:9px}
+.bdg{font-size:10px;font-weight:500;padding:3px 8px;border-radius:4px}
+.ag-title{font-size:13px;font-weight:500}
+.ag-role{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.chev{font-size:11px;color:var(--color-text-secondary);transition:transform .2s;flex-shrink:0}
+.chev.open{transform:rotate(180deg)}
+.ag-detail{display:none;margin-top:11px;border-top:0.5px solid var(--color-border-tertiary);padding-top:11px}
+.ag-detail.open{display:block}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.dft{grid-column:1/-1}
+.dtitle{font-size:10px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.di{font-size:11px;padding:3px 8px;border-left:2px solid var(--color-border-secondary);margin-bottom:3px;line-height:1.5;color:var(--color-text-primary)}
+.di.err{border-left-color:#E24B4A;color:var(--color-text-danger)}
+.di.warn{border-left-color:#EF9F27}
+.sec{font-size:13px;font-weight:500;padding:10px 0 8px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:12px}
+.fstep{display:flex;gap:11px;margin-bottom:13px;align-items:flex-start}
+.fnum{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;margin-top:1px}
+.fbody{flex:1}
+.ftitle{font-size:12px;font-weight:500;margin-bottom:2px}
+.fdesc{font-size:11px;color:var(--color-text-secondary);line-height:1.65}
+.ferr{font-size:10px;padding:5px 8px;border-radius:4px;margin-top:5px;background:var(--color-background-danger);color:var(--color-text-danger)}
+.farr{text-align:center;font-size:11px;color:var(--color-text-secondary);opacity:.35;margin:-7px 0 5px 33px}
+.pgl{font-size:10px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 7px}
+.pcard{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:11px 13px;margin-bottom:7px;background:var(--color-background-secondary);position:relative}
+.pnum{font-size:10px;color:var(--color-text-secondary);margin-bottom:5px;font-weight:500}
+.ptxt{font-size:11px;line-height:1.75;color:var(--color-text-primary);padding-right:52px;font-family:var(--font-mono)}
+.cbtn{position:absolute;top:9px;right:9px;font-size:10px;padding:3px 9px;border:0.5px solid var(--color-border-secondary);border-radius:4px;background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans);transition:background .15s}
+.cbtn:hover{background:var(--color-background-tertiary)}
+.crule{font-size:11px;color:var(--color-text-secondary);padding:3px 0;line-height:1.6}
+</style>
+
+<h2 class="sr-only">Multi-agent AI system design for a secure messaging platform with auth, PII filtering, messaging engine, admin dashboard, and file sharing — includes 14 Claude Code prompts</h2>
+
+<div style="padding:1rem 0">
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="arch" onclick="st('arch')">Architecture</button>
+  <button class="tab-btn" data-tab="agents" onclick="st('agents')">6 Agents</button>
+  <button class="tab-btn" data-tab="flow" onclick="st('flow')">Flow & Routing</button>
+  <button class="tab-btn" data-tab="prompts" onclick="st('prompts')">Claude Code Prompts</button>
+</div>
+
+<!-- ARCHITECTURE -->
+<div id="pane-arch" class="pane active">
+<p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.65">Three-layer system. Click any agent node to view its full spec.</p>
+
+<div class="layer-lbl">External actors</div>
+<div class="nrow">
+  <div class="anode" style="border-color:rgba(83,74,183,.4);background:rgba(83,74,183,.05)">
+    <div class="nn" style="color:#534AB7">Admin</div>
+    <div class="ns">Full system access</div>
+  </div>
+  <div class="anode" style="border-color:rgba(15,110,86,.4);background:rgba(15,110,86,.05)">
+    <div class="nn" style="color:#0F6E56">Agent (AGT-XXX)</div>
+    <div class="ns">Project-scoped only</div>
+  </div>
+  <div class="anode" style="border-color:rgba(153,60,29,.4);background:rgba(153,60,29,.05)">
+    <div class="nn" style="color:#993C1D">Client (CLT-XXX)</div>
+    <div class="ns">Channel-scoped only</div>
+  </div>
+</div>
+
+<div class="conn">↓ JWT-authenticated requests &amp; WebSocket connections ↓</div>
+
+<div class="layer-lbl">Agent layer — six specialized agents</div>
+<div class="nrow">
+  <div class="anode" onclick="ja('auth')" style="border-color:rgba(83,74,183,.35);background:rgba(83,74,183,.04)">
+    <div class="nn" style="color:#534AB7">Auth &amp; Identity</div>
+    <div class="ns">JWT · Tokens · System IDs</div>
+  </div>
+  <div class="anode" onclick="ja('project')" style="border-color:rgba(15,110,86,.35);background:rgba(15,110,86,.04)">
+    <div class="nn" style="color:#0F6E56">Project Manager</div>
+    <div class="ns">Projects · Channels · Isolation</div>
+  </div>
+  <div class="anode" onclick="ja('messaging')" style="border-color:rgba(24,95,165,.35);background:rgba(24,95,165,.04)">
+    <div class="nn" style="color:#185FA5">Messaging Engine</div>
+    <div class="ns">WebSocket · Persist · Fan-out</div>
+  </div>
+</div>
+<div class="nrow">
+  <div class="anode" onclick="ja('pii')" style="border-color:rgba(133,79,11,.35);background:rgba(133,79,11,.04)">
+    <div class="nn" style="color:#854F0B">PII Filter</div>
+    <div class="ns">Detect · Redact · Notify</div>
+  </div>
+  <div class="anode" onclick="ja('dashboard')" style="border-color:rgba(59,109,17,.35);background:rgba(59,109,17,.04)">
+    <div class="nn" style="color:#3B6D11">Admin Dashboard</div>
+    <div class="ns">Monitor · Manage · Control</div>
+  </div>
+  <div class="anode" onclick="ja('file')" style="border-color:rgba(153,60,29,.35);background:rgba(153,60,29,.04)">
+    <div class="nn" style="color:#993C1D">File Sharing</div>
+    <div class="ns">S3 · Strip EXIF · Audit log</div>
+  </div>
+</div>
+
+<div class="conn">↓ reads · writes · pub/sub ↓</div>
+
+<div class="layer-lbl">Infrastructure</div>
+<div class="nrow">
+  <div class="anode" style="cursor:default">
+    <div class="nn">PostgreSQL</div>
+    <div class="ns">Messages · Projects · Identity · File logs</div>
+  </div>
+  <div class="anode" style="cursor:default">
+    <div class="nn">Redis</div>
+    <div class="ns">Pub/sub · Token blacklist · Sessions</div>
+  </div>
+  <div class="anode" style="cursor:default">
+    <div class="nn">AWS S3</div>
+    <div class="ns">Files · Signed URLs (24h) · Metadata-stripped</div>
+  </div>
+</div>
+
+<div style="margin-top:16px;padding:12px 14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-secondary)">
+  <div style="font-size:11px;font-weight:500;margin-bottom:8px">Cross-cutting rules — enforced at every layer</div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px">
+    <div class="crule">→ System IDs only in chat — real names never transmitted</div>
+    <div class="crule">→ PII filter is a synchronous gate — runs before persistence</div>
+    <div class="crule">→ Project isolation enforced by middleware on every route</div>
+    <div class="crule">→ Identity table encrypted at rest with a separate AES key</div>
+    <div class="crule">→ Every file access logged with actor systemId + timestamp</div>
+    <div class="crule">→ Session killed server-side on termination — no wait for expiry</div>
+  </div>
+</div>
+</div>
+
+<!-- AGENTS -->
+<div id="pane-agents" class="pane">
+
+<div class="ag-card" onclick="ta('auth')">
+  <div class="ag-hdr">
+    <div class="ag-hdr-l">
+      <span class="bdg" style="background:rgba(83,74,183,.12);color:#534AB7">Agent 1</span>
+      <div><div class="ag-title">Auth &amp; Identity</div><div class="ag-role">Gateway guardian — every request passes through here first</div></div>
+    </div>
+    <span class="chev" id="chev-auth">▾</span>
+  </div>
+  <div class="ag-detail" id="detail-auth">
+    <div class="dgrid">
+      <div><div class="dtitle">Inputs</div>
+        <div class="di">Login: email + password</div>
+        <div class="di">Refresh token (header or cookie)</div>
+        <div class="di">Onboard request: role, name, email (admin only)</div>
+        <div class="di">Offboard request: userId (admin only)</div>
+      </div>
+      <div><div class="dtitle">Outputs</div>
+        <div class="di">JWT access token — 15 min, HS256, includes jti + role</div>
+        <div class="di">Refresh token — 7 days, stored in DB</div>
+        <div class="di">System ID — AGT-001 or CLT-001 (sequential, zero-padded)</div>
+        <div class="di">Redis blacklist entry on offboard (TTL = 15 min)</div>
+      </div>
+      <div class="dft"><div class="dtitle">Decision logic</div>
+        <div class="di">1 → Validate credentials. If User.status = TERMINATED → 401 immediately</div>
+        <div class="di">2 → Issue JWT with unique jti (UUID). Store jti in Redis key user:{id}:jti</div>
+        <div class="di">3 → On refresh: verify DB token not revoked/expired → delete old → issue new pair</div>
+        <div class="di">4 → On onboard: encrypt {name, email} with AES-256-GCM + random 12-byte IV → store blob + IV + authTag in identity_mapping</div>
+        <div class="di">5 → On offboard: mark User TERMINATED → revoke all RefreshTokens → fetch stored jti → SADD Redis blacklist (TTL 900s)</div>
+        <div class="di">6 → requireAuth middleware: verify JWT → check jti in blacklist → check role in allowed list</div>
+      </div>
+      <div class="dft"><div class="dtitle">Failure handling</div>
+        <div class="di err">Redis down → fall back to DB-based blacklist table (slower but safe — never skip the check)</div>
+        <div class="di err">Blacklist miss window: max 15 min blast radius before access token expires naturally</div>
+        <div class="di warn">Onboard DB failure → rollback full transaction. No partial systemId ever created.</div>
+      </div>
+      <div class="dft"><div class="dtitle">Scalability</div>
+        <div class="di">Stateless JWT — any server instance can verify without coordination. Only Redis blacklist is shared state → Redis Cluster if needed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ag-card" onclick="ta('project')">
+  <div class="ag-hdr">
+    <div class="ag-hdr-l">
+      <span class="bdg" style="background:rgba(15,110,86,.12);color:#0F6E56">Agent 2</span>
+      <div><div class="ag-title">Project Manager</div><div class="ag-role">Resource orchestrator — creates and enforces project isolation</div></div>
+    </div>
+    <span class="chev" id="chev-project">▾</span>
+  </div>
+  <div class="ag-detail" id="detail-project">
+    <div class="dgrid">
+      <div><div class="dtitle">Inputs</div>
+        <div class="di">Admin: create project {name, agentIds[], clientId}</div>
+        <div class="di">Admin: assign/unassign agents</div>
+        <div class="di">Any actor: project-scoped resource request</div>
+      </div>
+      <div><div class="dtitle">Outputs</div>
+        <div class="di">Project record in PostgreSQL</div>
+        <div class="di">Auto-created Channel (1:1 with project)</div>
+        <div class="di">ProjectAssignment rows per agent + client</div>
+        <div class="di">Access grant or 403 from middleware</div>
+      </div>
+      <div class="dft"><div class="dtitle">Decision logic</div>
+        <div class="di">1 → Verify ADMIN role on requester JWT</div>
+        <div class="di">2 → Validate all agentIds are ACTIVE AGENT users</div>
+        <div class="di">3 → Validate clientId is ACTIVE CLIENT not already in another project</div>
+        <div class="di">4 → Atomic Prisma transaction: create Project + Channel + all assignments. Rollback on any failure.</div>
+        <div class="di">5 → requireProjectAccess middleware: check ProjectAssignment table for req.user.id + projectId → 403 if not found (ADMIN bypasses)</div>
+      </div>
+      <div class="dft"><div class="dtitle">Failure handling</div>
+        <div class="di err">Channel creation fails → rollback entire transaction. A project without a channel must never exist.</div>
+        <div class="di warn">Invalid agentId → 400 with the specific failing ID. No partial project created.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ag-card" onclick="ta('messaging')">
+  <div class="ag-hdr">
+    <div class="ag-hdr-l">
+      <span class="bdg" style="background:rgba(24,95,165,.12);color:#185FA5">Agent 3</span>
+      <div><div class="ag-title">Messaging Engine</div><div class="ag-role">Real-time hub — persist first, then acknowledge, then fan-out</div></div>
+    </div>
+    <span class="chev" id="chev-messaging">▾</span>
+  </div>
+  <div class="ag-detail" id="detail-messaging">
+    <div class="dgrid">
+      <div><div class="dtitle">Inputs</div>
+        <div class="di">message:send WebSocket event from client/agent</div>
+        <div class="di">Sender JWT (validated at socket connect-time)</div>
+        <div class="di">projectId (from the socket's joined room)</div>
+      </div>
+      <div><div class="dtitle">Outputs</div>
+        <div class="di">Persisted Message row in PostgreSQL</div>
+        <div class="di">Redis PUBLISH → channel:{projectId}</div>
+        <div class="di">Redis PUBLISH → admin:monitor (all admins)</div>
+        <div class="di">message:ack event to sender (only after DB + Redis)</div>
+      </div>
+      <div class="dft"><div class="dtitle">Decision logic — pipeline order</div>
+        <div class="di">1 → Receive raw message:send event. Verify sender's socket is in the correct project room.</div>
+        <div class="di">2 → Route to PII Filter Agent (synchronous) → get {clean, redactedText, types}</div>
+        <div class="di">3 → INSERT {channelId, senderSystemId, content: redactedText} to PostgreSQL. Real names never stored.</div>
+        <div class="di">4 → PUBLISH to Redis channel:{projectId} and admin:monitor simultaneously</div>
+        <div class="di">5 → Emit message:ack to sender socket. Delivery confirmed only now.</div>
+        <div class="di">6 → All sockets subscribed via Redis receive message:new and broadcast to their room members</div>
+      </div>
+      <div class="dft"><div class="dtitle">Failure handling</div>
+        <div class="di err">PostgreSQL write fails → emit message:error to sender. Stop. No Redis publish. Message lost — correctness over availability.</div>
+        <div class="di err">Redis publish fails → message is persisted. Emit message:ack anyway. Recipients fetch via lastMessageId sync on reconnect.</div>
+        <div class="di warn">PII filter throws → block message, notify sender. Never fail open — a crashed filter equals contaminated message.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ag-card" onclick="ta('pii')">
+  <div class="ag-hdr">
+    <div class="ag-hdr-l">
+      <span class="bdg" style="background:rgba(133,79,11,.12);color:#854F0B">Agent 4</span>
+      <div><div class="ag-title">PII Filter</div><div class="ag-role">Privacy enforcer — synchronous gate, always fails closed</div></div>
+    </div>
+    <span class="chev" id="chev-pii">▾</span>
+  </div>
+  <div class="ag-detail" id="detail-pii">
+    <div class="dgrid">
+      <div><div class="dtitle">Inputs</div>
+        <div class="di">Raw message string</div>
+        <div class="di">Sender's socket reference (for notification)</div>
+      </div>
+      <div><div class="dtitle">Outputs</div>
+        <div class="di">{clean: bool, redactedText: string, types: string[]}</div>
+        <div class="di">message:redacted event to sender if anything found</div>
+      </div>
+      <div class="dft"><div class="dtitle">Detection rules (all patterns replace with [REDACTED BY SYSTEM])</div>
+        <div class="di">INDIAN_PHONE → /(?:(?:\+91|0)[- ]?)?[6-9]\d{9}/g</div>
+        <div class="di">INTL_PHONE → /\+[1-9]\d{6,14}/g</div>
+        <div class="di">EMAIL → /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g</div>
+        <div class="di">SOCIAL → /@[a-zA-Z0-9_.]{2,30}|t\.me\/\S+|wa\.me\/\S+/g</div>
+        <div class="di">UPI_ID → /[a-zA-Z0-9._\-]{3,}@[a-zA-Z]{2,}/g (run after EMAIL to dedup)</div>
+        <div class="di">EXTERNAL_URL → /https?:\/\/(?!internal\.yourdomain\.com)\S+/gi</div>
+      </div>
+      <div class="dft"><div class="dtitle">Decision logic</div>
+        <div class="di">1 → Run all regexes in sequence, track which types matched</div>
+        <div class="di">2 → Replace every match in-place with [REDACTED BY SYSTEM]</div>
+        <div class="di">3 → If any match: emit message:redacted to sender socket with types list + "External links blocked: use file sharing" for URLs</div>
+        <div class="di">4 → Return result to Messaging Engine (which stores the redacted version)</div>
+      </div>
+      <div class="dft"><div class="dtitle">Failure handling</div>
+        <div class="di err">Regex engine throws → return {clean: false, redactedText: '[MESSAGE BLOCKED BY SYSTEM]', types: ['ERROR']}. Never pass through an unverified message.</div>
+        <div class="di warn">False positive → admin reviews pre-redaction content from audit log (stored separately, admin-only table). Regex refined and redeployed.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ag-card" onclick="ta('dashboard')">
+  <div class="ag-hdr">
+    <div class="ag-hdr-l">
+      <span class="bdg" style="background:rgba(59,109,17,.12);color:#3B6D11">Agent 5</span>
+      <div><div class="ag-title">Admin Dashboard</div><div class="ag-role">Operations controller — live visibility across all projects</div></div>
+    </div>
+    <span class="chev" id="chev-dashboard">▾</span>
+  </div>
+  <div class="ag-detail" id="detail-dashboard">
+    <div class="dgrid">
+      <div><div class="dtitle">Inputs</div>
+        <div class="di">HTTP requests (all dashboard routes)</div>
+        <div class="di">Redis subscription: admin:monitor</div>
+        <div class="di">Filter params: ?projectId, ?agentId, ?clientId</div>
+      </div>
+      <div><div class="dtitle">Outputs</div>
+        <div class="di">Live message feed (Socket.IO room 'admin')</div>
+        <div class="di">Project list: assignments, last message, count</div>
+        <div class="di">User list: systemId, role, status (no real names)</div>
+        <div class="di">Delegates onboard/offboard to Auth Agent</div>
+      </div>
+      <div class="dft"><div class="dtitle">Decision logic</div>
+        <div class="di">1 → All routes require ADMIN role. Checked by requireAuth(['ADMIN']).</div>
+        <div class="di">2 → Admin socket connects → JWT verified → socket joins 'admin' room</div>
+        <div class="di">3 → Redis subscriber pushes every admin:monitor message to 'admin' Socket.IO room in real time</div>
+        <div class="di">4 → Message feed queries: systemId only — identity_mapping is NEVER queried in this path</div>
+        <div class="di">5 → Cursor-based pagination (no offset) for unbounded message feeds</div>
+      </div>
+      <div class="dft"><div class="dtitle">Failure handling</div>
+        <div class="di warn">Redis subscription drops → reconnect with exponential backoff. Show "monitoring interrupted" banner to admin. Does not affect message delivery.</div>
+        <div class="di warn">Heavy query load → read replica for dashboard queries, primary only for writes.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ag-card" onclick="ta('file')">
+  <div class="ag-hdr">
+    <div class="ag-hdr-l">
+      <span class="bdg" style="background:rgba(153,60,29,.12);color:#993C1D">Agent 6</span>
+      <div><div class="ag-title">File Sharing</div><div class="ag-role">Secure file handler — strip, store, log — never proxy</div></div>
+    </div>
+    <span class="chev" id="chev-file">▾</span>
+  </div>
+  <div class="ag-detail" id="detail-file">
+    <div class="dgrid">
+      <div><div class="dtitle">Inputs</div>
+        <div class="di">POST /files/upload (multipart, file + projectId)</div>
+        <div class="di">GET /files/:fileId (download request)</div>
+        <div class="di">Uploader JWT (must be project-assigned)</div>
+      </div>
+      <div><div class="dtitle">Outputs</div>
+        <div class="di">Cleaned file uploaded to S3</div>
+        <div class="di">Presigned S3 URL (24h expiry)</div>
+        <div class="di">FileAccessLog row: fileId, actor systemId, action, timestamp</div>
+      </div>
+      <div class="dft"><div class="dtitle">Upload decision logic</div>
+        <div class="di">1 → requireAuth + requireProjectAccess for the projectId</div>
+        <div class="di">2 → Read file to memory buffer (enforce 25MB max)</div>
+        <div class="di">3 → JPEG/PNG/WEBP → run through sharp(buffer).toBuffer() — strips all EXIF (GPS, device ID, author, timestamps)</div>
+        <div class="di">4 → DOCX/XLSX → open ZIP with PizZip, blank out docProps/core.xml (removes author, lastModifiedBy, created dates), repack</div>
+        <div class="di">5 → Upload cleaned buffer to S3 key: {projectId}/{timestamp}-{uuid}.{ext}</div>
+        <div class="di">6 → INSERT FileRecord + FileAccessLog {action: UPLOAD} in a single transaction</div>
+        <div class="di">7 → Return presigned GetObject URL (expiresIn: 86400)</div>
+      </div>
+      <div class="dft"><div class="dtitle">Download decision logic</div>
+        <div class="di">1 → Verify requester is assigned to the file's project (or ADMIN)</div>
+        <div class="di">2 → Generate presigned URL via @aws-sdk/s3-request-presigner</div>
+        <div class="di">3 → INSERT FileAccessLog {action: DOWNLOAD}. If log fails: still return URL but alert error monitoring.</div>
+        <div class="di">4 → Return signed URL — never stream the file through your server</div>
+      </div>
+      <div class="dft"><div class="dtitle">Failure handling</div>
+        <div class="di err">S3 upload fails → return 502. Create zero DB records. No partial entries.</div>
+        <div class="di err">Log INSERT fails after S3 upload → delete the S3 object (compensating transaction). Unlogged files are not permitted.</div>
+        <div class="di warn">Unknown file type → reject at intake. Only JPEG, PNG, WEBP, DOCX, XLSX, PDF accepted.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- FLOW -->
+<div id="pane-flow" class="pane">
+<div class="sec">Message lifecycle — send to delivery</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:rgba(83,74,183,.15);color:#534AB7">1</div>
+  <div class="fbody"><div class="ftitle">User sends via WebSocket</div>
+  <div class="fdesc">Client emits message:send. Socket.IO validates JWT on connection — if expired, socket is disconnected. Sender's systemId and role are attached to socket.data at connect-time. Real name never touches the socket.</div></div>
+</div>
+<div class="farr">↓</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:rgba(24,95,165,.15);color:#185FA5">2</div>
+  <div class="fbody"><div class="ftitle">Project access check</div>
+  <div class="fdesc">Messaging engine checks the sender's userId is in the ProjectAssignment table for this channel's project. Agents can only see their assigned projects — they are blind to everything else.</div>
+  <div class="ferr">Failure → emit message:error to sender. Message dropped. Other participants never see it.</div></div>
+</div>
+<div class="farr">↓</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:rgba(133,79,11,.15);color:#854F0B">3</div>
+  <div class="fbody"><div class="ftitle">PII Filter Agent (synchronous gate)</div>
+  <div class="fdesc">Raw content routed to piiFilter(). All 6 regex patterns run. If any PII detected, content is redacted and sender receives message:redacted event with the list of what was found. Pipeline continues with the redacted text.</div>
+  <div class="ferr">Failure → filter throws → message blocked entirely. Fail closed, always.</div></div>
+</div>
+<div class="farr">↓</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:rgba(59,109,17,.15);color:#3B6D11">4</div>
+  <div class="fbody"><div class="ftitle">PostgreSQL persistence — write before acknowledge</div>
+  <div class="fdesc">INSERT Message: {channelId, senderSystemId, content (redacted version), createdAt}. Real names are never stored in messages. Transaction must commit. This is the source of truth.</div>
+  <div class="ferr">Failure → emit message:error to sender. Stop here. No Redis publish. Message intentionally lost.</div></div>
+</div>
+<div class="farr">↓</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:rgba(153,60,29,.15);color:#993C1D">5</div>
+  <div class="fbody"><div class="ftitle">Redis dual publish — project + admin monitor</div>
+  <div class="fdesc">PUBLISH serialized message to channel:{projectId} (hits project members) and admin:monitor (hits all admin sockets) simultaneously. Fire-and-forget after DB commit.</div>
+  <div class="ferr">Failure → message is persisted. Recipients sync via lastMessageId on next reconnect.</div></div>
+</div>
+<div class="farr">↓</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:rgba(15,110,86,.15);color:#0F6E56">6</div>
+  <div class="fbody"><div class="ftitle">Acknowledgment + delivery</div>
+  <div class="fdesc">Emit message:ack to sender only now — delivery is confirmed. All other project sockets receive message:new. Admin dashboard receives the same message via admin:monitor stream in real time.</div></div>
+</div>
+
+<div class="sec" style="margin-top:20px">Feedback loops</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">↻</div>
+  <div class="fbody"><div class="ftitle">Token refresh loop</div>
+  <div class="fdesc">Frontend detects 401 → POST /auth/refresh → rotate token pair → retry original request. If refresh token also expired or revoked (offboarded user) → force logout, clear all local state.</div></div>
+</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">↻</div>
+  <div class="fbody"><div class="ftitle">Socket reconnect + message sync</div>
+  <div class="fdesc">On socket reconnect, client sends {lastMessageId}. Server responds with all messages since that ID from PostgreSQL. This covers the Redis pub/sub gap during disconnection without data loss.</div></div>
+</div>
+
+<div class="fstep">
+  <div class="fnum" style="background:var(--color-background-secondary);color:var(--color-text-secondary)">↻</div>
+  <div class="fbody"><div class="ftitle">PII regex refinement loop</div>
+  <div class="fdesc">False positive reported → admin reviews pre-redaction audit log (admin-only table) → PII team refines regex → redeploy filter module. No retroactive changes to stored messages.</div></div>
+</div>
+
+<div class="sec" style="margin-top:20px">Scalability design</div>
+<div style="font-size:11px;color:var(--color-text-secondary);line-height:1.85">
+  <div style="margin-bottom:5px">→ <span style="color:var(--color-text-primary);font-weight:500">Stateless API servers</span> — JWT verification needs no shared state. Scale horizontally behind a load balancer freely.</div>
+  <div style="margin-bottom:5px">→ <span style="color:var(--color-text-primary);font-weight:500">socket.io-redis adapter</span> — WebSocket events fan out across multiple API server instances via Redis. Required as soon as you run more than one server.</div>
+  <div style="margin-bottom:5px">→ <span style="color:var(--color-text-primary);font-weight:500">Read replicas</span> for PostgreSQL — admin dashboard queries hit replica. Write path (messages, logs) hits primary only.</div>
+  <div style="margin-bottom:5px">→ <span style="color:var(--color-text-primary);font-weight:500">PII Filter</span> is pure CPU-bound synchronous code — no network hop. Extract to worker_threads if CPU bottleneck appears.</div>
+  <div>→ <span style="color:var(--color-text-primary);font-weight:500">S3 + presigned URLs</span> — file downloads never touch your API servers. Add CloudFront in front of S3 with signed cookies for CDN-level performance.</div>
+</div>
+</div>
+
+<!-- PROMPTS -->
+<div id="pane-prompts" class="pane">
+<p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;line-height:1.65">Paste these into Claude Code in order. Each prompt is self-contained — wait for Claude Code to finish before using the next one. Copy button grabs the exact text.</p>
+
+<div class="pgl">1 — Project setup</div>
+
+<div class="pcard"><div class="pnum">Prompt 1.1 — Initialize project</div>
+<button class="cbtn" onclick="cp(this,'pr1')">Copy</button>
+<div class="ptxt" id="pr1">Initialize a Node.js TypeScript project for a secure messaging platform. Use Express for HTTP, Prisma ORM with PostgreSQL, ioredis for Redis, and Socket.IO for WebSockets. Create this folder structure: src/agents/auth, src/agents/project, src/agents/messaging, src/agents/pii-filter, src/agents/admin, src/agents/file. Add a docker-compose.yml with postgres:15 and redis:7 services. Add a .env.example with: DATABASE_URL, REDIS_URL, JWT_SECRET, REFRESH_TOKEN_SECRET, IDENTITY_ENCRYPTION_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, S3_BUCKET_NAME. Install all dependencies. Confirm the Express server starts on port 3000 with a GET / health check returning {status: "ok"}.</div></div>
+
+<div class="pcard"><div class="pnum">Prompt 1.2 — Prisma schema</div>
+<button class="cbtn" onclick="cp(this,'pr2')">Copy</button>
+<div class="ptxt" id="pr2">Create the Prisma schema at prisma/schema.prisma with these models: User (id uuid pk, systemId string unique, role enum ADMIN/AGENT/CLIENT, status enum ACTIVE/TERMINATED, createdAt). IdentityMapping (id, userId foreign key to User, encryptedData bytes, iv bytes, authTag bytes — stores AES-256-GCM encrypted {name, email}). RefreshToken (id, userId fk, token string unique, expiresAt datetime, revokedAt datetime nullable). Project (id, name, clientId fk to User, createdAt). ProjectAssignment (projectId fk, userId fk, assignedAt — composite primary key). Channel (id, projectId fk unique — one-to-one). Message (id, channelId fk, senderSystemId string, content text, createdAt). FileRecord (id, projectId fk, uploaderSystemId string, s3Key string, originalName string, mimeType string, createdAt). FileAccessLog (id, fileId fk to FileRecord, actorSystemId string, action enum UPLOAD/DOWNLOAD, createdAt). Run prisma migrate dev --name init.</div></div>
+
+<div class="pgl">2 — Auth &amp; Identity Agent</div>
+
+<div class="pcard"><div class="pnum">Prompt 2.1 — JWT + refresh token system</div>
+<button class="cbtn" onclick="cp(this,'pr3')">Copy</button>
+<div class="ptxt" id="pr3">In src/agents/auth/, build the auth system. (1) POST /auth/login: find user by email, verify bcrypt password, check status is ACTIVE or return 401. Issue a JWT access token using HS256 with JWT_SECRET, 15 minute expiry, payload includes {userId, systemId, role, jti: uuid()}. Issue a refresh token (random 64-byte hex string), store in RefreshToken table with expiresAt = now + 7 days. Store the jti in Redis key user:{userId}:jti with TTL 900. Return {accessToken, refreshToken}. (2) POST /auth/refresh: find the RefreshToken by token string, check not revoked and not expired, delete it, issue new access+refresh pair using same logic. (3) Export middleware requireAuth(roles: Role[]) that: extracts Bearer token, verifies JWT signature and expiry, checks jti not in Redis Set 'jti:blacklist', checks user.role is in the roles array. Attach decoded payload to req.user.</div></div>
+
+<div class="pcard"><div class="pnum">Prompt 2.2 — Onboarding with system IDs + encryption</div>
+<button class="cbtn" onclick="cp(this,'pr4')">Copy</button>
+<div class="ptxt" id="pr4">In src/agents/auth/, add POST /admin/onboard protected by requireAuth(['ADMIN']). Accept {role: 'AGENT'|'CLIENT', name: string, email: string}. In a Prisma transaction: (1) Query the max numeric suffix of existing systemIds for that role (e.g. AGT-007 → 7), increment by 1, format as AGT-001 or CLT-001 (padded to 3 digits). (2) Create User with the systemId and role. (3) Encrypt {name, email} as JSON string using AES-256-GCM: generate crypto.randomBytes(12) as IV, use IDENTITY_ENCRYPTION_KEY from env as the key (import it as a 32-byte Buffer from hex), call createCipheriv, get encrypted buffer + authTag. (4) Create IdentityMapping with userId, encryptedData, iv, authTag. Return only {systemId, role}. Never return name or email in the response.</div></div>
+
+<div class="pcard"><div class="pnum">Prompt 2.3 — Offboarding + instant session kill</div>
+<button class="cbtn" onclick="cp(this,'pr5')">Copy</button>
+<div class="ptxt" id="pr5">In src/agents/auth/, add POST /admin/offboard protected by requireAuth(['ADMIN']). Accept {userId: string}. Execute in this exact order: (1) Update User.status to TERMINATED in Prisma. (2) Update all RefreshTokens for that userId: set revokedAt = now. (3) Fetch the stored jti from Redis key user:{userId}:jti. (4) If jti exists: add it to Redis Set 'jti:blacklist' using SADD, then call EXPIRE on 'jti:blacklist' to reset TTL to 900 seconds (15 minutes — the access token lifetime). (5) Delete the Redis key user:{userId}:jti. The requireAuth middleware must check SISMEMBER 'jti:blacklist' on every request. Return {success: true, systemId}. If userId not found, return 404.</div></div>
+
+<div class="pgl">3 — Project &amp; Channel Agent</div>
+
+<div class="pcard"><div class="pnum">Prompt 3.1 — Project creation + isolation middleware</div>
+<button class="cbtn" onclick="cp(this,'pr6')">Copy</button>
+<div class="ptxt" id="pr6">In src/agents/project/, build POST /projects protected by requireAuth(['ADMIN']). Accept {name: string, agentIds: string[], clientId: string}. Run a Prisma transaction: (1) Verify each agentId exists as an ACTIVE AGENT user — if any fails, throw with the specific agentId. (2) Verify clientId exists as an ACTIVE CLIENT user. (3) Create the Project record. (4) Create Channel with projectId foreign key. (5) Create ProjectAssignment rows for all agentIds and the clientId. If any step throws, rollback everything. Then create and export middleware requireProjectAccess: read projectId from req.params.projectId or req.body.projectId, query ProjectAssignment for {projectId, userId: req.user.userId}, if not found AND req.user.role !== 'ADMIN', return 403 with {error: 'Not assigned to this project'}. Apply this middleware to all /projects/:projectId/* routes.</div></div>
+
+<div class="pgl">4 — Messaging Engine Agent</div>
+
+<div class="pcard"><div class="pnum">Prompt 4.1 — Socket.IO setup with JWT auth</div>
+<button class="cbtn" onclick="cp(this,'pr7')">Copy</button>
+<div class="ptxt" id="pr7">In src/agents/messaging/, set up Socket.IO on the Express HTTP server. Add an io.use() middleware that: extracts token from socket.handshake.auth.token, verifies JWT, checks jti against Redis jti:blacklist, attaches {userId, systemId, role} to socket.data. On the connection event, listen for channel:join with {projectId}. Query ProjectAssignment to verify the connecting socket's userId is assigned to that project (or role is ADMIN). If not assigned: emit channel:error with 'Not assigned' and call socket.disconnect(). If assigned: call socket.join('project:' + projectId) and store projectId in socket.data.projectId. All subsequent message events are only valid within this room.</div></div>
+
+<div class="pcard"><div class="pnum">Prompt 4.2 — Persist-first message pipeline</div>
+<button class="cbtn" onclick="cp(this,'pr8')">Copy</button>
+<div class="ptxt" id="pr8">In src/agents/messaging/, handle the message:send socket event. Implement this exact pipeline order: (1) Call piiFilter(data.content) from src/agents/pii-filter. Get {clean, redactedText, types}. If not clean, emit message:redacted to socket with {types, notice: 'Your message was edited by the system'}. Use redactedText as content going forward. (2) INSERT a Message row: {channelId: socket.data.channelId, senderSystemId: socket.data.systemId, content: redactedText}. If Prisma throws: emit message:error to sender, return early — no Redis publish. (3) Serialize the message as JSON and redis.publish('channel:' + socket.data.projectId, serialized) and redis.publish('admin:monitor', serialized). (4) Only after step 2 succeeds: emit message:ack to the sender socket. Create a separate Redis subscriber client that listens on channel:* and admin:monitor patterns and re-emits to the correct Socket.IO rooms.</div></div>
+
+<div class="pgl">5 — PII Filter Agent</div>
+
+<div class="pcard"><div class="pnum">Prompt 5.1 — Detection, redaction, unit tests</div>
+<button class="cbtn" onclick="cp(this,'pr9')">Copy</button>
+<div class="ptxt" id="pr9">Create src/agents/pii-filter/index.ts exporting a pure function piiFilter(text: string): {clean: boolean, redactedText: string, types: string[]}. Define these regexes as named constants: INDIAN_PHONE = /(?:(?:\+91|0)[- ]?)?[6-9]\d{9}/g, INTL_PHONE = /\+[1-9]\d{6,14}/g, EMAIL = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g, SOCIAL = /@[a-zA-Z0-9_.]{2,30}|t\.me\/\S+|wa\.me\/\S+/g, UPI = /[a-zA-Z0-9._\-]{3,}@[a-zA-Z]{2,}/g, EXTERNAL_URL = /https?:\/\/\S+/gi. Run each regex, replace all matches with [REDACTED BY SYSTEM], track which types fired. Wrap everything in try-catch: on error return {clean: false, redactedText: '[MESSAGE BLOCKED BY SYSTEM]', types: ['ERROR']}. Never fail open. Also create src/agents/pii-filter/index.test.ts with Jest tests covering: Indian phone, international phone, email, UPI ID, @handle, t.me link, wa.me link, external URL (each with 2 examples), and one clean message that passes through unchanged.</div></div>
+
+<div class="pgl">6 — Admin Dashboard Agent</div>
+
+<div class="pcard"><div class="pnum">Prompt 6.1 — Dashboard API + live feed</div>
+<button class="cbtn" onclick="cp(this,'pr10')">Copy</button>
+<div class="ptxt" id="pr10">In src/agents/admin/, create three REST endpoints all protected by requireAuth(['ADMIN']). (1) GET /admin/messages: query Message table joined to Channel, support filter params ?projectId, ?agentSystemId (filter senderSystemId), ?clientSystemId. Cursor-based pagination: accept ?cursor (last messageId) and ?limit (default 50). Return {messages: [{id, channelId, senderSystemId, content, createdAt}], nextCursor}. Never query IdentityMapping. (2) GET /admin/projects: return each Project with its Channel, array of assigned agent systemIds (from ProjectAssignment joined to User), client systemId, message count, last message createdAt. (3) GET /admin/users: return all Users as {systemId, role, status}. Also subscribe to Redis 'admin:monitor' channel. On message: parse JSON and emit 'message:new' event to Socket.IO room 'admin'. Admin sockets join room 'admin' on connect (after JWT verification confirms ADMIN role in socket.data).</div></div>
+
+<div class="pgl">7 — File Sharing Agent</div>
+
+<div class="pcard"><div class="pnum">Prompt 7.1 — Upload with EXIF + author stripping</div>
+<button class="cbtn" onclick="cp(this,'pr11')">Copy</button>
+<div class="ptxt" id="pr11">In src/agents/file/, build POST /files/upload. Use multer with memoryStorage and a 25MB file size limit. After requireAuth and requireProjectAccess middleware: (1) Read file buffer from req.file.buffer. (2) If mimetype is image/jpeg, image/png, or image/webp: process with sharp — const cleanBuffer = await sharp(buffer).toBuffer() — this strips all EXIF including GPS, device ID, and author. (3) If mimetype is application/vnd.openxmlformats-officedocument.wordprocessingml.document or the xlsx equivalent: load with PizZip, find the file 'docProps/core.xml' in the zip, replace its content with this exact string: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"></cp:coreProperties>', call zip.generate({type: 'nodebuffer'}) for the clean buffer. (4) Upload cleanBuffer to S3 via PutObjectCommand with key: projectId + '/' + Date.now() + '-' + randomUUID() + ext. (5) If S3 upload throws, return 502 immediately with no DB writes. (6) INSERT FileRecord and FileAccessLog {action: 'UPLOAD'} in a Prisma transaction. (7) Generate and return a presigned GetObjectCommand URL with expiresIn: 86400.</div></div>
+
+<div class="pcard"><div class="pnum">Prompt 7.2 — Download with audit logging</div>
+<button class="cbtn" onclick="cp(this,'pr12')">Copy</button>
+<div class="ptxt" id="pr12">In src/agents/file/, build GET /files/:fileId after requireAuth middleware. (1) Find FileRecord by fileId — return 404 if not found. (2) Check the requester (req.user.userId) is in ProjectAssignment for the file's projectId, OR req.user.role is ADMIN. Return 403 if neither. (3) Generate a presigned URL: import {GetObjectCommand} from '@aws-sdk/client-s3' and {getSignedUrl} from '@aws-sdk/s3-request-presigner'. Create the command with Bucket and Key from FileRecord.s3Key. Call getSignedUrl(s3Client, command, {expiresIn: 86400}). (4) INSERT FileAccessLog: {fileId, actorSystemId: req.user.systemId, action: 'DOWNLOAD', createdAt: new Date()}. If this INSERT fails, log the error to console.error but still return the URL to the user. Never stream the file through the server. Return {url: signedUrl, expiresIn: 86400}.</div></div>
+
+<div class="pgl">8 — Testing</div>
+
+<div class="pcard"><div class="pnum">Prompt 8.1 — Auth integration tests</div>
+<button class="cbtn" onclick="cp(this,'pr13')">Copy</button>
+<div class="ptxt" id="pr13">Write Jest integration tests in src/agents/auth/auth.test.ts using Supertest. Use a separate test database (override DATABASE_URL in jest.config). Test these cases in order: (1) POST /auth/login with valid credentials returns {accessToken, refreshToken} where both are valid JWTs. (2) Any request with an expired access token returns 401 with {error: 'Token expired'}. (3) POST /auth/refresh returns a new token pair and the old refreshToken row in DB has been deleted. (4) POST /auth/refresh again with the rotated-out (now deleted) refresh token returns 401. (5) POST /admin/offboard then POST /auth/refresh with that user's refresh token returns 401. (6) POST /admin/offboard then make a request with the user's still-valid access token — returns 401 because jti is in Redis blacklist. Use beforeEach to create fresh test users and afterEach to clean up all test data from DB and Redis.</div></div>
+
+<div class="pcard"><div class="pnum">Prompt 8.2 — PII unit tests + E2E message flow</div>
+<button class="cbtn" onclick="cp(this,'pr14')">Copy</button>
+<div class="ptxt" id="pr14">First, confirm all PII unit tests in src/agents/pii-filter/index.test.ts pass. Then write a Socket.IO integration test in src/agents/messaging/messaging.test.ts using socket.io-client. Test the full message flow: (1) Connect two sockets (as agent and client) both with valid JWTs for the same project. Both join the same channel. (2) Agent sends a clean message — both sockets receive message:new with the content intact, sender receives message:ack. (3) Agent sends a message containing a phone number (9876543210) — sender receives message:redacted event, both sockets receive message:new with [REDACTED BY SYSTEM] in place of the number. (4) Verify the persisted message in PostgreSQL also contains the redacted version (never the raw PII). (5) Connect a third socket with a JWT for a different project — verify it does NOT receive messages from the first project's channel. Clean up all sockets and DB rows in afterAll.</div></div>
+
+</div><!-- end prompts pane -->
+
+</div><!-- end wrapper -->
+
+<script>
+function st(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  const pane=document.getElementById('pane-'+id);
+  if(pane)pane.classList.add('active');
+}
+function ta(id){
+  const d=document.getElementById('detail-'+id);
+  const c=document.getElementById('chev-'+id);
+  if(!d)return;
+  const o=d.classList.contains('open');
+  d.classList.toggle('open',!o);
+  if(c)c.classList.toggle('open',!o);
+}
+function ja(agentId){
+  st('agents');
+  setTimeout(()=>{
+    const d=document.getElementById('detail-'+agentId);
+    if(d&&!d.classList.contains('open'))ta(agentId);
+    const card=d?d.closest('.ag-card'):null;
+    if(card)card.scrollIntoView({behavior:'smooth',block:'start'});
+  },80);
+}
+function cp(btn,id){
+  const el=document.getElementById(id);
+  if(!el)return;
+  navigator.clipboard.writeText(el.textContent.trim()).then(()=>{
+    btn.textContent='Copied!';
+    setTimeout(()=>btn.textContent='Copy',1800);
+  }).catch(()=>{
+    btn.textContent='Failed';
+    setTimeout(()=>btn.textContent='Copy',1800);
+  });
+}
+</script>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Anonymouse — Secure Team Messaging</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -29,7 +29,17 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-main); height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+html, body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-main);
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeInSlideUp {
@@ -41,7 +51,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: v
   100% { opacity: 1; }
 }
 
-.screen { display: none !important; height: 100vh; width: 100vw; }
+.screen { display: none !important; height: 100%; width: 100%; }
 .screen.active { display: flex !important; animation: fadeIn 0.3s ease-out forwards; }
 
 /* ── TYPOGRAPHY & BUTTONS ── */
@@ -305,10 +315,14 @@ p { line-height: 1.6; }
   .role-grid {
     grid-template-columns: 1fr;
     gap: 16px;
-    padding: 0 16px;
+    padding: 0;
+    width: 100%;
   }
   .pick-container {
     padding: 24px 16px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
   .pick-title {
     font-size: 28px;
@@ -319,11 +333,15 @@ p { line-height: 1.6; }
   }
   .role-card {
     padding: 24px 20px;
+    width: 100%;
   }
 
   /* Onboarding page layout */
   .ob-container {
-    padding: 24px 20px;
+    padding: 24px 16px;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
   }
   .ob-footer {
     flex-direction: column;
@@ -345,6 +363,9 @@ p { line-height: 1.6; }
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: var(--shadow-float);
+    width: 280px !important;
+    max-width: 80vw !important;
+    height: 100% !important;
   }
   .app-sidebar.mobile-show {
     transform: translateX(0);
@@ -361,6 +382,9 @@ p { line-height: 1.6; }
     box-shadow: var(--shadow-float);
     border-left: none;
     border-right: 1px solid var(--border-light);
+    width: 280px !important;
+    max-width: 80vw !important;
+    height: 100% !important;
   }
   .demo-console.mobile-show {
     transform: translateX(0);
@@ -369,6 +393,20 @@ p { line-height: 1.6; }
   /* Toggle button display */
   .btn-menu-toggle, .btn-console-toggle {
     display: inline-flex;
+  }
+
+  /* Admin / Chat Main Sizing to fit viewport */
+  .chat-main, .admin-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+  }
+  
+  #activeChatView {
+    min-width: 0 !important;
+    width: 100% !important;
   }
 
   /* Admin main / content spacing */
@@ -387,6 +425,7 @@ p { line-height: 1.6; }
     display: block;
     overflow-x: auto;
     white-space: nowrap;
+    width: 100%;
   }
 
   /* Chat main interface layout */
@@ -401,6 +440,13 @@ p { line-height: 1.6; }
   }
   .chat-input-area {
     padding: 12px 16px 16px;
+  }
+
+  /* Modal responsive adjustment */
+  .modal-content {
+    width: calc(100% - 32px) !important;
+    margin: 16px !important;
+    padding: 24px 20px !important;
   }
 }
 

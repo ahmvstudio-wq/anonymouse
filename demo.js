@@ -62,6 +62,7 @@ loadState();
 
 // ─── UTILS ───────────────────────────────────────────────────
 function showScreen(id) {
+  closeAllDrawers();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
@@ -208,6 +209,7 @@ function prevStep() {
 
 // ─── ADMIN DASHBOARD ─────────────────────────────────────────
 function adminNav(page) {
+  closeAllDrawers();
   state.activeAdminTab = page;
   document.querySelectorAll('#s-admin .nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('nav-' + page).classList.add('active');
@@ -516,6 +518,7 @@ function initChatApp() {
 }
 
 function openChat(projId) {
+  closeAllDrawers();
   state.activeChat = projId;
   document.querySelectorAll('.chat-channel').forEach(el => el.classList.remove('active'));
   document.getElementById(`nav-ch-${projId}`).classList.add('active');
@@ -708,3 +711,37 @@ document.getElementById('fileInputHidden').addEventListener('change', function(e
   if (!file || !state.activeChat) return;
   simulateSanitize(file.name, file.type.startsWith('image/') ? 'image' : 'doc');
 });
+
+// ─── MOBILE RESPONSIVE DRAWERS ──────────────────────────────
+function toggleAdminSidebar(e) {
+  if (e) e.stopPropagation();
+  const sidebar = document.querySelector('#s-admin .app-sidebar');
+  sidebar.classList.toggle('mobile-show');
+  document.getElementById('drawerOverlay').classList.toggle('active', sidebar.classList.contains('mobile-show'));
+}
+
+function toggleChatSidebar(e) {
+  if (e) e.stopPropagation();
+  const sidebar = document.querySelector('#s-chat .app-sidebar');
+  sidebar.classList.toggle('mobile-show');
+  // Hide console if showing
+  document.querySelector('#s-chat .demo-console').classList.remove('mobile-show');
+  document.getElementById('drawerOverlay').classList.toggle('active', sidebar.classList.contains('mobile-show'));
+}
+
+function toggleDemoConsole(e) {
+  if (e) e.stopPropagation();
+  const consoleEl = document.querySelector('#s-chat .demo-console');
+  consoleEl.classList.toggle('mobile-show');
+  // Hide sidebar if showing
+  document.querySelector('#s-chat .app-sidebar').classList.remove('mobile-show');
+  document.getElementById('drawerOverlay').classList.toggle('active', consoleEl.classList.contains('mobile-show'));
+}
+
+function closeAllDrawers() {
+  document.querySelectorAll('.app-sidebar, .demo-console').forEach(el => {
+    el.classList.remove('mobile-show');
+  });
+  document.getElementById('drawerOverlay').classList.remove('active');
+}
+

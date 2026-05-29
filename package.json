@@ -4,7 +4,7 @@
   "description": "Secure multi-agent messaging platform",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "test": "jest --runInBand --detectOpenHandles"

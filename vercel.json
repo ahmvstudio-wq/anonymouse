@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/auth/(.*)",
+      "dest": "src/index.ts"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "src/index.ts"
+    },
+    {
+      "src": "/projects/(.*)",
+      "dest": "src/index.ts"
+    },
+    {
+      "src": "/files/(.*)",
+      "dest": "src/index.ts"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "demo.html"
+    }
+  ]
+}

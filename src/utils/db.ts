@@ -1,5 +1,34 @@
 import { PrismaClient } from '@prisma/client';
 import Redis from 'ioredis';
+import fs from 'fs';
+import path from 'path';
+
+// Configure dynamic database location on Vercel
+if (process.env.VERCEL) {
+  const tmpDbPath = '/tmp/dev.db';
+  const bundledDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+  
+  process.env.DATABASE_URL = `file:${tmpDbPath}`;
+  
+  try {
+    if (!fs.existsSync(tmpDbPath)) {
+      console.log('Copying bundled SQLite database to /tmp...');
+      if (fs.existsSync(bundledDbPath)) {
+        fs.copyFileSync(bundledDbPath, tmpDbPath);
+        fs.chmodSync(tmpDbPath, 0o666); // Make sure it's read/writeable
+        console.log('Database successfully copied to /tmp!');
+      } else {
+        console.warn('Bundled database template not found at:', bundledDbPath);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to copy database to /tmp:', error);
+  }
+} else {
+  if (!process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = 'file:./dev.db';
+  }
+}
 
 const prisma = new PrismaClient();
 
